@@ -11,7 +11,7 @@ load_dotenv()
 GARMIN_EMAIL    = os.getenv("GARMIN_EMAIL")
 GARMIN_PASSWORD = os.getenv("GARMIN_PASSWORD")
 
-DB_HOST     = os.getenv("DB_HOST", "localhost")
+DB_HOST     = os.getenv("DB_HOST", "timescaledb")
 DB_PORT     = os.getenv("DB_PORT", "5432")
 DB_NAME     = os.getenv("DB_NAME", "garmin_db")
 DB_USER     = os.getenv("DB_USER", "garmin")
@@ -19,11 +19,35 @@ DB_PASSWORD = os.getenv("DB_PASSWORD", "garmin123")
 
 
 def connect_garmin():
-    """Log in to Garmin Connect and return API client."""
+    """Log in to Garmin Connect using saved OAuth tokens."""
     print("🔐 Logging in to Garmin Connect...")
+
+    token_path = "/opt/airflow/garmin_tokens"
+    local_token_path = "./garmin_tokens"
+
+    # Pick the right path — Docker or local
+    active_token_path = token_path if os.path.exists(token_path) else local_token_path
+
+    if os.path.exists(os.path.join(active_token_path, "oauth2_token.json")):
+        print(f"  Loading OAuth tokens from {active_token_path}...")
+        try:
+            # This is the correct way to init Garmin with saved tokens
+            client = Garmin()
+            client.garth.load(active_token_path)
+            # Make a lightweight call to confirm token is valid
+            client.get_full_name()
+            print("✅ Garmin token login successful!")
+            return client
+        except Exception as e:
+            print(f"  Token failed ({e}) — falling back to fresh login...")
+
+    # Fresh login fallback
+    print("  Doing fresh login...")
     client = Garmin(GARMIN_EMAIL, GARMIN_PASSWORD)
     client.login()
-    print("✅ Garmin login successful!")
+    os.makedirs(active_token_path, exist_ok=True)
+    client.garth.dump(active_token_path)
+    print("✅ Fresh login successful, tokens saved!")
     return client
 
 

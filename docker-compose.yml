@@ -15,6 +15,7 @@ x-airflow-common: &airflow-common
     - ./airflow/logs:/opt/airflow/logs
     - ./ingestion:/opt/airflow/ingestion
     - ./.env:/opt/airflow/.env
+    - ./garmin_tokens:/opt/airflow/garmin_tokens
   depends_on:
     timescaledb:
       condition: service_healthy

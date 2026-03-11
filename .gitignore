@@ -27,3 +27,6 @@ Thumbs.db
 
 # Docker
 *.log
+
+# Garmin session tokens
+garmin_tokens/
