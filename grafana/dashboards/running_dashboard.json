@@ -1,0 +1,185 @@
+{
+  "title": "Garmin Running Dashboard",
+  "uid": "garmin-running-v1",
+  "timezone": "browser",
+  "refresh": "5m",
+  "time": { "from": "now-90d", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Total Runs",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "green" },
+          "unit": "none"
+        }
+      },
+      "targets": [{
+        "datasource": "TimescaleDB",
+        "rawSql": "SELECT COUNT(*) as value FROM analytics_marts.fct_runs;",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Total Distance (km)",
+      "type": "stat",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "unit": "none",
+          "decimals": 1
+        }
+      },
+      "targets": [{
+        "datasource": "TimescaleDB",
+        "rawSql": "SELECT ROUND(SUM(distance_km)::numeric, 1) as value FROM analytics_marts.fct_runs;",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Avg Pace (min/km)",
+      "type": "stat",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "orange" },
+          "unit": "none",
+          "decimals": 2
+        }
+      },
+      "targets": [{
+        "datasource": "TimescaleDB",
+        "rawSql": "SELECT ROUND(AVG(pace_min_per_km)::numeric, 2) as value FROM analytics_marts.fct_runs;",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Avg Heart Rate",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "red" },
+          "unit": "none"
+        }
+      },
+      "targets": [{
+        "datasource": "TimescaleDB",
+        "rawSql": "SELECT ROUND(AVG(avg_hr)::numeric, 0) as value FROM analytics_marts.fct_runs;",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 5,
+      "title": "VO2 Max (Latest)",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "purple" },
+          "unit": "none",
+          "decimals": 1
+        }
+      },
+      "targets": [{
+        "datasource": "TimescaleDB",
+        "rawSql": "SELECT vo2max as value FROM analytics_marts.fct_runs WHERE vo2max IS NOT NULL ORDER BY activity_date DESC LIMIT 1;",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 6,
+      "title": "Weekly Distance (km)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "green" },
+          "unit": "none",
+          "custom": {
+            "fillOpacity": 20,
+            "lineWidth": 2
+          }
+        }
+      },
+      "targets": [{
+        "datasource": "TimescaleDB",
+        "rawSql": "SELECT week_start as time, total_km as \"Weekly KM\" FROM analytics_marts.mart_weekly_summary WHERE $__timeFilter(week_start) ORDER BY week_start;",
+        "format": "time_series"
+      }]
+    },
+    {
+      "id": 7,
+      "title": "HR Zone Distribution",
+      "type": "piechart",
+      "gridPos": { "x": 12, "y": 4, "w": 6, "h": 8 },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": ["percent"]
+      },
+      "targets": [{
+        "datasource": "TimescaleDB",
+        "rawSql": "SELECT hr_zone as \"Zone\", COUNT(*) as \"Runs\" FROM analytics_marts.fct_runs GROUP BY hr_zone ORDER BY hr_zone;",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 8,
+      "title": "Pace Zone Distribution",
+      "type": "piechart",
+      "gridPos": { "x": 18, "y": 4, "w": 6, "h": 8 },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": ["percent"]
+      },
+      "targets": [{
+        "datasource": "TimescaleDB",
+        "rawSql": "SELECT pace_zone as \"Zone\", COUNT(*) as \"Runs\" FROM analytics_marts.fct_runs GROUP BY pace_zone ORDER BY pace_zone;",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 9,
+      "title": "Recent Runs",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
+      "options": {
+        "sortBy": [{ "displayName": "Date", "desc": true }]
+      },
+      "targets": [{
+        "datasource": "TimescaleDB",
+        "rawSql": "SELECT activity_date as \"Date\", activity_name as \"Run\", distance_km as \"KM\", duration_mins as \"Mins\", pace_min_per_km as \"Pace\", avg_hr as \"Avg HR\", hr_zone as \"HR Zone\", pace_zone as \"Pace Zone\", calories as \"Calories\", elevation_gain_m as \"Elevation\" FROM analytics_marts.fct_runs ORDER BY activity_date DESC LIMIT 20;",
+        "format": "table"
+      }]
+    }
+  ],
+  "schemaVersion": 36,
+  "version": 1
+}
