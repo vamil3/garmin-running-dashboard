@@ -1,0 +1,18 @@
+name: 'garmin_dbt'
+version: '1.0.0'
+config-version: 2
+
+profile: 'garmin_dbt'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  garmin_dbt:
+    staging:
+      +schema: staging
+      +materialized: view
+    marts:
+      +schema: marts
+      +materialized: table
