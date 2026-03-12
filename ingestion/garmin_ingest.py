@@ -11,7 +11,16 @@ load_dotenv()
 GARMIN_EMAIL    = os.getenv("GARMIN_EMAIL")
 GARMIN_PASSWORD = os.getenv("GARMIN_PASSWORD")
 
-DB_HOST     = os.getenv("DB_HOST", "timescaledb")
+import socket
+# Auto-detect environment — use 'timescaledb' in Docker, 'localhost' otherwise
+def get_db_host():
+    try:
+        socket.gethostbyname("timescaledb")
+        return "timescaledb"
+    except socket.gaierror:
+        return "localhost"
+
+DB_HOST = get_db_host()
 DB_PORT     = os.getenv("DB_PORT", "5432")
 DB_NAME     = os.getenv("DB_NAME", "garmin_db")
 DB_USER     = os.getenv("DB_USER", "garmin")
