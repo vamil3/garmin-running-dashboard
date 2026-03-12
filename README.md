@@ -190,6 +190,7 @@ Entire stack (5 services) spins up with one command. Volume mounts ensure data p
 
 **Fully automated pipeline — zero manual steps**
 The Airflow DAG runs every 5 minutes and chains three tasks: fetch from Garmin → run dbt transformations → health check. OAuth tokens auto-refresh if expired. Adding `dbt-postgres` to Airflow's pip requirements means dbt runs inside the same container with no external dependencies.
+
 ---
 
 ## 🔮 Roadmap
