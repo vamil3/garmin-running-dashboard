@@ -104,7 +104,7 @@ def save_activity(cursor, activity: dict):
     """, activity)
 
 
-def run_ingestion(num_activities: int = 50):
+def run_ingestion(num_activities: int = 100):
     """Main ingestion function — pulls latest activities from Garmin."""
 
     # Connect to Garmin
@@ -114,20 +114,41 @@ def run_ingestion(num_activities: int = 50):
     conn = connect_db()
     cursor = conn.cursor()
 
-    # Fetch activities
-    print(f"\n📥 Fetching last {num_activities} activities from Garmin...")
-    activities = client.get_activities(0, num_activities)
+    print(f"\n📥 Fetching ALL running history from Garmin...")
 
-    # Filter running only
-    running = [a for a in activities if
-               a.get("activityType", {}).get("typeKey", "") == "running"]
+    all_running = []
+    batch_size  = 100
+    start_index = 0
 
-    print(f"🏃 Found {len(running)} running activities (out of {len(activities)} total)")
+    # Keep fetching until no more activities come back
+    while True:
+        print(f"  Fetching batch starting at index {start_index}...")
+        batch = client.get_activities(start_index, batch_size)
+
+        # No more activities — we've reached the end
+        if not batch:
+            break
+
+        # Filter running only from this batch
+        running = [a for a in batch if
+                   a.get("activityType", {}).get("typeKey", "") == "running"]
+
+        all_running.extend(running)
+        print(f"  Found {len(running)} runs in this batch")
+
+        # If batch returned less than we asked for — we've hit the end
+        if len(batch) < batch_size:
+            break
+
+        start_index += batch_size
+
+    print(f"\n🏃 Total running activities found: {len(all_running)}")
 
     # Save each one
-    saved = 0
+    saved   = 0
     skipped = 0
-    for activity in running:
+
+    for activity in all_running:
         parsed = parse_activity(activity)
         save_activity(cursor, parsed)
         if cursor.rowcount > 0:
