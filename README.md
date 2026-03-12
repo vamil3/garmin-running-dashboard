@@ -127,6 +127,11 @@ cd dbt_project && dbt run
 | Grafana | http://localhost:3000 | admin / admin123 |
 | Airflow | http://localhost:8080 | admin / admin123 |
 
+
+**8. Dashboard Preview**
+
+![Dashboard](docs/dashboard_screenshot.png)
+
 ---
 
 ## 📁 Project Structure
