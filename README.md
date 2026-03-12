@@ -30,16 +30,18 @@
 ## 🏗 Architecture
 ```
 Garmin Watch
+     ↓ (Bluetooth)
+Garmin Connect App
+     ↓ (Internet)
+Garmin Connect Cloud
      ↓
-Garmin Connect (cloud)
+python-garminconnect  ←── OAuth2 token auth (auto-refresh)
      ↓
-python-garminconnect  ←── OAuth token auth
-     ↓
-Apache Airflow DAG    ←── Runs every 30 minutes
+Apache Airflow DAG    ←── Runs every 5 minutes
      ↓
 TimescaleDB           ←── Hypertable time-series storage
      ↓
-dbt transformations   ←── staging → facts → marts
+dbt transformations   ←── Auto-runs inside Airflow DAG
      ↓
 Grafana Dashboard     ←── Live auto-refreshing panels
 ```
@@ -70,7 +72,7 @@ mart_weekly_summary     (aggregated weekly metrics for dashboard)
 | Layer | Tool | Version | Purpose |
 |---|---|---|---|
 | Ingestion | python-garminconnect | Latest | Pulls data from Garmin Connect API |
-| Orchestration | Apache Airflow | 2.8 | Schedules pipeline every 30 mins |
+| Orchestration | Apache Airflow | 2.8 | Schedules pipeline every 5 mins + runs dbt |
 | Database | TimescaleDB | PG15 | Time-series optimized storage |
 | Transformation | dbt | 1.7 | Layered SQL transformations |
 | Visualization | Grafana OSS | Latest | Live dashboard with auto-refresh |
@@ -115,10 +117,12 @@ python ingestion/save_garmin_token.py
 python ingestion/garmin_ingest.py
 ```
 
-**6. Run dbt transformations**
-```bash
-cd dbt_project && dbt run
-```
+**6. Start syncing**
+
+The pipeline runs automatically every 5 minutes. Just trigger the first run manually:
+- Go to http://localhost:8080 (Airflow)
+- Toggle `garmin_sync_dag` ON
+- Click ▶ Trigger DAG
 
 **7. Open dashboards**
 
@@ -184,6 +188,8 @@ Garmin uses OAuth2. Saving and reusing tokens avoids repeated MFA prompts and ra
 **Docker Compose orchestration**
 Entire stack (5 services) spins up with one command. Volume mounts ensure data persists across container restarts.
 
+**Fully automated pipeline — zero manual steps**
+The Airflow DAG runs every 5 minutes and chains three tasks: fetch from Garmin → run dbt transformations → health check. OAuth tokens auto-refresh if expired. Adding `dbt-postgres` to Airflow's pip requirements means dbt runs inside the same container with no external dependencies.
 ---
 
 ## 🔮 Roadmap
