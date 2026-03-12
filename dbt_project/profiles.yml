@@ -1,0 +1,12 @@
+garmin_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: timescaledb
+      port: 5432
+      user: garmin
+      password: garmin123
+      dbname: garmin_db
+      schema: analytics
+      threads: 4

@@ -7,13 +7,21 @@ load_dotenv()
 email    = os.getenv("GARMIN_EMAIL")
 password = os.getenv("GARMIN_PASSWORD")
 
-print("🔐 Logging in to Garmin to save session token...")
-
+print("🔐 Logging in to Garmin...")
 client = Garmin(email, password)
 client.login()
 
-# Save the session token to a local folder
+# Save token
 client.garth.dump("garmin_tokens")
+print("✅ Token saved!")
 
-print("✅ Token saved to ./garmin_tokens folder!")
-print("This token will be shared with Docker so Airflow can log in silently.")
+# Immediately test activity fetch
+print("\n📥 Testing activity fetch...")
+activities = client.get_activities(0, 5)
+print(f"✅ Found {len(activities)} activities")
+
+for a in activities:
+    type_key = a.get("activityType", {}).get("typeKey", "unknown")
+    name     = a.get("activityName", "unnamed")
+    date     = a.get("startTimeLocal", "unknown")
+    print(f"  → {name} | {type_key} | {date}")
