@@ -1,7 +1,7 @@
 # 🏃 Garmin Running Dashboard
 
 > A production-grade, real-time running analytics pipeline built with 100% open-source tools.
-> Automatically syncs Garmin Connect data every 30 minutes into a live Grafana dashboard.
+> Automatically syncs Garmin Connect data every 5 minutes into a live Grafana dashboard.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white)
 ![Airflow](https://img.shields.io/badge/Airflow-2.8-017CEE?style=flat&logo=apacheairflow&logoColor=white)
