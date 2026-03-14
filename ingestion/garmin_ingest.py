@@ -41,12 +41,6 @@ def connect_garmin():
             client = Garmin(GARMIN_EMAIL, GARMIN_PASSWORD)
             client.garth.load(active_token_path)
             client.get_full_name()
-
-            # ── CRITICAL: Verify token can actually fetch activities ──
-            test = client.get_activities(0, 1)
-            if not test:
-                raise Exception("Token valid but returned no activities — forcing refresh")
-
             print("✅ Garmin token login successful!")
             return client
 
