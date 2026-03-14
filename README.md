@@ -1,7 +1,7 @@
 # 🏃 Garmin Running Dashboard
 
 > A production-grade, real-time running analytics pipeline built with 100% open-source tools.
-> Automatically syncs Garmin Connect data every 30 minutes into a live Grafana dashboard.
+> Automatically syncs Garmin Connect data every 5 minutes into a live Grafana dashboard.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white)
 ![Airflow](https://img.shields.io/badge/Airflow-2.8-017CEE?style=flat&logo=apacheairflow&logoColor=white)
@@ -190,6 +190,7 @@ Entire stack (5 services) spins up with one command. Volume mounts ensure data p
 
 **Fully automated pipeline — zero manual steps**
 The Airflow DAG runs every 5 minutes and chains three tasks: fetch from Garmin → run dbt transformations → health check. OAuth tokens auto-refresh if expired. Adding `dbt-postgres` to Airflow's pip requirements means dbt runs inside the same container with no external dependencies.
+
 ---
 
 ## 🔮 Roadmap
