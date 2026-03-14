@@ -19,7 +19,7 @@ with DAG(
     dag_id='garmin_sync_dag',
     description='Fetches running data from Garmin Connect every 30 minutes',
     default_args=default_args,
-    schedule_interval='*/5 * * * *',
+    schedule_interval='*/30 * * * *',
     start_date=days_ago(1),
     catchup=False,
     tags=['garmin', 'running', 'ingestion'],
@@ -67,7 +67,7 @@ with DAG(
     # ── Task 2: Run dbt transformations ─────────────────
     dbt_task = BashOperator(
         task_id='run_dbt_transformations',
-        bash_command='cd /opt/airflow/dbt_project && dbt run --profiles-dir /opt/airflow/dbt_project',
+        bash_command='cd /opt/airflow/dbt_project && /home/airflow/.local/bin/dbt run --profiles-dir /opt/airflow/dbt_project',
         env={
             'DBT_PROFILES_DIR': '/opt/airflow/dbt_project',
             'PATH': '/usr/local/bin:/usr/bin:/bin'
