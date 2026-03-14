@@ -1,7 +1,7 @@
 # 🏃 Garmin Running Dashboard
 
 > A production-grade, real-time running analytics pipeline built with 100% open-source tools.
-> Automatically syncs Garmin Connect data every 5 minutes into a live Grafana dashboard.
+> Automatically syncs Garmin Connect data every 30 minutes into a live Grafana dashboard.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white)
 ![Airflow](https://img.shields.io/badge/Airflow-2.8-017CEE?style=flat&logo=apacheairflow&logoColor=white)
@@ -37,7 +37,7 @@ Garmin Connect Cloud
      ↓
 python-garminconnect  ←── OAuth2 token auth (auto-refresh)
      ↓
-Apache Airflow DAG    ←── Runs every 5 minutes
+Apache Airflow DAG    ←── Runs every 30 minutes
      ↓
 TimescaleDB           ←── Hypertable time-series storage
      ↓
@@ -119,7 +119,7 @@ python ingestion/garmin_ingest.py
 
 **6. Start syncing**
 
-The pipeline runs automatically every 5 minutes. Just trigger the first run manually:
+The pipeline runs automatically every 30 minutes. Just trigger the first run manually:
 - Go to http://localhost:8080 (Airflow)
 - Toggle `garmin_sync_dag` ON
 - Click ▶ Trigger DAG
@@ -189,7 +189,7 @@ Garmin uses OAuth2. Saving and reusing tokens avoids repeated MFA prompts and ra
 Entire stack (5 services) spins up with one command. Volume mounts ensure data persists across container restarts.
 
 **Fully automated pipeline — zero manual steps**
-The Airflow DAG runs every 5 minutes and chains three tasks: fetch from Garmin → run dbt transformations → health check. OAuth tokens auto-refresh if expired. Adding `dbt-postgres` to Airflow's pip requirements means dbt runs inside the same container with no external dependencies.
+The Airflow DAG runs every 30 minutes and chains three tasks: fetch from Garmin → run dbt transformations → health check. OAuth tokens auto-refresh if expired. Adding `dbt-postgres` to Airflow's pip requirements means dbt runs inside the same container with no external dependencies.
 
 ---
 
